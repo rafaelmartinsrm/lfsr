@@ -8,35 +8,31 @@
 section .text
 	global 	main
 	extern 	printf
-	LFSR_SEED	equ	01h 											;define SEED
+	LFSR_SEED	equ	01h 											;define semente
 
 main:
-	xor	eax, eax			;eax=0
-	xor	ebx, ebx			;ebx=0
-	mov	eax, LFSR_SEED		;eax=LFSR_SEED
+	xor	eax, eax			;eax = 0
+	xor	ebx, ebx			;ebx = 0
+	mov	eax, LFSR_SEED		;eax = LFSR_SEED
 	mov edx, 0
 
 print_loop:
-	call	shift_lfsr		;call to shif_lfsr procedure
+	call	shift_lfsr
 	mov ebx, eax
 	shr ebx, 20
 	add dword [counter + ebx*4], 1
 
-	; push	eax			;save eax on stack
+	; push	eax			; insere elementos na pilha
 	; push edx
-	; _output	format_num, eax		;print number
+	; _output	format_num, eax		; imprime número
 	; pop edx
-	; pop	eax			;get eax
+	; pop	eax			; remove elementos da pilha eax
 
 	inc edx
-	cmp	edx, 0FFFFFFh		;compare with seed
-	jne	print_loop		;continue loop
+	cmp	edx, 0FFFFFFh		; compara com fim
+	jne	print_loop		; continua loop
 
 	jmp results	;
-
-	mov	al, 1			;al=1
-	xor	ebx, ebx			;ebx=0
-	int	80h			;int 80h
 
 shift_lfsr:
 	mov	ecx, eax 															; ecx = eax
@@ -76,6 +72,10 @@ print_results:
 	inc eax
 	cmp eax, 16
 	jne print_results
+
+mov eax, 1 ; SYS_exit
+mov ebx, 0 ; 0=OK , parametro de SYS_EXIT
+int 0x80 ; chamada do kernel
 
 section .data
 	format_hex:	db	"0x%08x", 10, 0 ;
