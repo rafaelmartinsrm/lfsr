@@ -6,7 +6,7 @@
 %endmacro
 
 section .text
-	global 	main
+	global 	main, shift_lfsr
 	extern 	printf
 	LFSR_SEED	equ	01h 											;define semente
 
@@ -16,7 +16,7 @@ main:
 	mov	eax, LFSR_SEED		;eax = LFSR_SEED
 	mov edx, 0
 
-print_loop:
+loop:
 	call	shift_lfsr
 	mov ebx, eax
 	shr ebx, 20
@@ -28,13 +28,20 @@ print_loop:
 	; pop edx
 	; pop	eax			; remove elementos da pilha eax
 
+
 	inc edx
 	cmp	edx, 0FFFFFFh		; compara com fim
-	jne	print_loop		; continua loop
+	jne	loop		; continua loop
 
 	jmp results	;
 
+; eax = lsfr
+; retorna = eax = lsfr
 shift_lfsr:
+	enter 4,0
+	pusha
+	pushf
+
 	mov	ecx, eax 															; ecx = eax
 	mov	ebx, ecx 															; ebx = ecx
 	shr ebx, 1																; (ebx = lfsr >> 2) # 22
@@ -55,8 +62,13 @@ shift_lfsr:
 	mov eax, ecx															; ret = eax = ecx
 
 	and eax, 0x00FFFFFF												; 24-bit
+	mov [ebp-4], eax
 
 end:
+	popf
+	popa
+	mov eax, [ebp-4]
+	leave
 	ret
 
 results:
